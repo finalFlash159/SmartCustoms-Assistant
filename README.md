@@ -55,7 +55,7 @@ Người dùng nhận được phản hồi cuối cùng.
 
 Dưới đây là một ví dụ về dữ liệu (thực tế dữ liệu được cung cấp không đẹp như vậy):
 
-<img src="imgs/pdf_sample.png" alt="pdf_sample" width="300">
+<img src="imgs/pdf_sample.png" alt="pdf_sample" width="450">
 
 
 ---
@@ -134,7 +134,7 @@ Chuyển đổi và định dạng lại cột ngày tháng .
 
 Dưới đây là một ví dụ về dữ liệu:
 
-<img src="imgs/doc_sample.png" alt="pdf_sample" width="300">
+<img src="imgs/doc_sample.png" alt="pdf_sample" width="450">
 
 ---
 
