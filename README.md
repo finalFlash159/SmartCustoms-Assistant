@@ -41,31 +41,7 @@ Người dùng nhận được phản hồi cuối cùng.
 
 ## Pipelines xử lý
 
-```mermaid
-flowchart TD
-    C(pipelines)
-    
-    C --> D(doc_pipelines)
-    D --> F["doc_processor.py"]
-    
-    C --> G(llm_pipelines)
-    G --> I["data_preparation.py"]
-    G --> J["embedding_generator.py"]
-    G --> K["response_generator.py"]
-    
-    C --> L(pdf_pipelines)
-    L --> N["gpt_ocr.py"]
-    L --> O["image_processor.py"]
-    L --> P["yolo_detector.py"]
-    
-    C --> Q(rag_pipelines)
-    Q --> S["crossencoder_reranker.py"]
-    Q --> T["search_engine.py"]
-    Q --> U["vector_store.py"]
-    
-    C --> V(xlsx_pipelines)
-    V --> X["xlsx_processor.py"]
-```
+![pipelines.png](imgs/pipelines.png)
 
 ### 1. PDF
 
