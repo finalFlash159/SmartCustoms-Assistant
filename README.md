@@ -1,7 +1,7 @@
 # Smart Customs Assistant
 SmartCustoms-Assistant là dự án Chatbot RAG (Retrieval-Augmented Generation), tập trung hỗ trợ người dùng trong lĩnh vực xuất nhập khẩu, hải quan, và hàng hóa. Chatbot sử dụng LLM (Large Language Model) làm “bộ não” để sinh phản hồi, kết hợp với kho dữ liệu được lưu dưới dạng vector embeddings để truy xuất thông tin (retrieval) một cách hiệu quả.
 
-![RAG_FLOW.png](imgs/RAG-flow1.png)
+![RAG_FLOW.png](imgs/RAG_FLOW.png)
 
 ## 1. Mục tiêu
 - Tự động trả lời các câu hỏi liên quan đến quy định xuất nhập khẩu, thủ tục hải quan, mã HS, giấy tờ cần thiết, v.v.
