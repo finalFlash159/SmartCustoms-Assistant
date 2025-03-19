@@ -122,7 +122,7 @@ Overlap giữa các chunk: Các chunk trong cùng một tài liệu sẽ có ph�
   [Drive Link](https://drive.google.com/drive/folders/1nD3ke0PfkfS4P8bNWKQwbXDsn6vUw1aR?usp=sharing)
 
 - **Dataset (Roboflow)**  
-  [Dataset Link](https://universe.roboflow.com/watermarkdetect/watermark-signatur)
+  [Dataset Link](https://app.roboflow.com/watermarkdetect/watermark-signature/browse?queryText=&pageSize=50&startingIndex=0&browseQuery=true)
 
 - **Original data (Cẩm nang XNK - Bộ Tài Chính)**
 	[Original Data Link](https://camnangxnk-logistics.net/tai-lieu-xuat-nhap-khau/bo-tai-chinh/)
