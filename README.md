@@ -113,9 +113,7 @@ Below is a sample dataset (in reality, the provided data may be less “clean”
 - **Data Source**: Excel (`.xlsx`) files containing relevant information across multiple columns (dates, numbers, strings, etc.).
 - Sample data:
 
-<p align="center">
-  <img src="imgs/xlsx_sample.png" alt="pdf_sample" width="500" />
-</p>
+![xlsx_sample.png](imgs/xlsx_sample.png)
 
 #### Approach
 
