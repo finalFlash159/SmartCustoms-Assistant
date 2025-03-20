@@ -2,7 +2,7 @@
 
 **SmartCustoms-Assistant** is a **Retrieval-Augmented Generation (RAG) chatbot** project focused on assisting users with **import/export regulations, customs procedures, and goods classification**. The chatbot leverages a **Large Language Model (LLM)** as its “brain” to generate responses, combined with a vector-embedded data store for efficient information retrieval.
 
-![RAG_FLOW.png](:/37d56ede98d241b8aa1dbaa324326950)
+![RAG_FLOW.png](imgs/RAG_FLOW.png)
 
 ---
 
@@ -47,18 +47,21 @@ The project consists of several key steps:
 
 ## 3. Processing Pipelines
 
-![pipelines.png](:/91a6b3a904344322bf2ca654be7901cf)
+![pipelines.png](imgs/pipelines.png)
 
 ### 1. PDF
 
-![PDF_FLOW.png](:/99d06dabcaf24badad1cd59e11b194c9)
+![PDF_FLOW.png](imgs/PDF_FLOW.png)
 
 - **Data Source**: PDF files that are actually scanned images, meaning traditional PDF-reading methods do not apply (no hidden text layer).
 - **Requirement**: Extract text with high accuracy, especially regarding dates and crucial references (circular numbers, etc.).
 
 Below is a sample dataset (in reality, the provided data may be less “clean”):
 
-<img src=":/e23339ce3aa64b1b863fc47aafeab9f4" alt="pdf_sample" width="500">
+<p align="center">
+  <img src="imgs/pdf_sample.png" alt="pdf_sample" width="400" />
+</p>
+
 
 #### Approach
 
@@ -105,12 +108,14 @@ Below is a sample dataset (in reality, the provided data may be less “clean”
 
 ### 2. XLSX
 
-![XLSX_FLOW.png](:/e8cc6d1b707c4f7e879d04e05638a9df)
+![XLSX_FLOW.png](imgs/XLSX_FLOW.png)
 
 - **Data Source**: Excel (`.xlsx`) files containing relevant information across multiple columns (dates, numbers, strings, etc.).
 - Sample data:
 
-![xlsx_sample.png](:/a7e83af170b64d9dbb965f36eaad8bbc)
+<p align="center">
+  <img src="imgs/xlsx_sample.png" alt="pdf_sample" width="400" />
+</p>
 
 #### Approach
 
@@ -129,13 +134,15 @@ Below is a sample dataset (in reality, the provided data may be less “clean”
 
 ### 3. DOC - DOCX
 
-![DOC_FLOW.png](:/36d9a48f03684cfdabac8ff25464dbde)
+![DOC_FLOW.png](imgs/DOC_FLOW.png)
 
 - **Data Source**: Word files (`.doc` or `.docx`) containing text, often government decrees from the Ministry of Finance or similar.
 
 Sample data:
 
-<img src=":/2926822fccdd425d9f7881341653f663" alt="pdf_sample" width="500">
+<p align="center">
+  <img src="imgs/doc_sample.png" alt="pdf_sample" width="400" />
+</p>
 
 #### Approach
 
@@ -192,7 +199,7 @@ Sample data:
 
 ## Key Functionalities
 
-![API.png](:/84b152265e554fedbdcf3381956fc302)
+![API.png](imgs/API.png)
 
 ### 1. Chat Endpoint
 - **Route**: `POST /chat`  
