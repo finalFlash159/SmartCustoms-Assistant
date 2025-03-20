@@ -114,7 +114,7 @@ Below is a sample dataset (in reality, the provided data may be less “clean”
 - Sample data:
 
 <p align="center">
-  <img src="imgs/xlsx_sample.png" alt="pdf_sample" width="400" />
+  <img src="imgs/xlsx_sample.png" alt="pdf_sample" width="500" />
 </p>
 
 #### Approach
