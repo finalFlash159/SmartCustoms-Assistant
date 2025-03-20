@@ -252,3 +252,7 @@ Sample data:
   - Saves the file to `data/uploaded`, runs `xlsx_processor_pipeline` to convert content into JSON.  
   - Uses `DataLoader` to extract text, create embeddings, and store them in Qdrant.  
   - Returns “Processed, embeddings created and saved to Qdrant”.
+
+
+## Demo Deplpyment
+[![Watch the video](https://img.youtube.com/vi/-ZZQbGUVjco/0.jpg)](https://www.youtube.com/watch?v=-ZZQbGUVjco)
