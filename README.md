@@ -122,7 +122,7 @@ Below is a sample dataset (in reality, the provided data may be less “clean”
 - **Dataset (Roboflow)**  
   [Dataset Link](https://universe.roboflow.com/watermarkdetect/watermark-signatur)
 
-- **Original Data (Import-Export Handbook - Ministry of Finance)**  
+- **Original Data (Cẩm nang XNK - Bộ Tài Chính)**  
   [Original Data Link](https://camnangxnk-logistics.net/tai-lieu-xuat-nhap-khau/bo-tai-chinh/)
 
 ---
