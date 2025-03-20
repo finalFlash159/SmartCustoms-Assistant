@@ -5,6 +5,27 @@
 ![RAG_FLOW.png](imgs/RAG_FLOW.png)
 
 ---
+## Table of Contents
+- [Objectives](#1-objectives)
+- [Overall Architecture](#2-overall-architecture)
+- [Processing Pipelines](#3-processing-pipelines)
+  - [PDF](#1-pdf)
+  - [XLSX](#2-xlsx)
+  - [DOC - DOCX](#3-doc---docx)
+- [RAG Pipeline](#rag-pipeline)
+  - [VectorStoreManager](#1-vectorstoremanager)
+  - [CrossReranker](#2-crossreranker)
+  - [SearchEngine](#3-searchengine)
+- [LLM Pipeline](#llm-pipeline)
+- [Key Functionalities](#key-functionalities)
+  - [Chat Endpoint](#1-chat-endpoint)
+  - [List Uploaded Files](#2-list-uploaded-files)
+  - [Delete Uploaded File](#3-delete-uploaded-file)
+  - [Upload & Process DOC/DOCX](#4-upload--process-docdocx)
+  - [Upload & Process PDF](#5-upload--process-pdf)
+  - [Upload & Process XLSX](#6-upload--process-xlsx)
+- [Demo Deployment](#demo-deplpyment)
+---
 
 ## 1. Objectives
 - **Automatically answer** questions about **import/export regulations**, **customs procedures**, **HS codes**, and required documents.  
