@@ -203,16 +203,16 @@ Sample data:
 
 ## LLM Pipeline
 
-- **(1) DataLoader**  
-  - Converts **JSON data** (from processed PDF, DOCX, XLSX) into lists of text and metadata.
+### 1. `DataLoader`  
+- Converts **JSON data** (from processed PDF, DOCX, XLSX) into lists of text and metadata.
 
-- **(2) EmbeddingGenerator**  
-  - Calls **OpenAI Embeddings** to turn text into vectors, supporting batch splitting and retries.
+### 2. `EmbeddingGenerator`
+- Calls **OpenAI Embeddings** to turn text into vectors, supporting batch splitting and retries.
 
-- **(3) LangChainGenerator**  
-  - Uses **ChatOpenAI** to generate final answers.  
-  - If RAG-provided documents exist, it answers based on them; otherwise, it relies on general knowledge.  
-  - Maintains a short **conversation history** and outputs results in Markdown.
+### 3. `LangChainGenerator`
+- Uses **ChatOpenAI** to generate final answers.  
+- If RAG-provided documents exist, it answers based on them; otherwise, it relies on general knowledge.  
+- Maintains a short **conversation history** and outputs results in Markdown.
 
 ---
 
