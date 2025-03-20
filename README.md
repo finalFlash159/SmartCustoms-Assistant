@@ -1,158 +1,249 @@
 # Smart Customs Assistant
-SmartCustoms-Assistant là dự án Chatbot RAG (Retrieval-Augmented Generation), tập trung hỗ trợ người dùng trong lĩnh vực xuất nhập khẩu, hải quan, và hàng hóa. Chatbot sử dụng LLM (Large Language Model) làm “bộ não” để sinh phản hồi, kết hợp với kho dữ liệu được lưu dưới dạng vector embeddings để truy xuất thông tin (retrieval) một cách hiệu quả.
 
-![RAG_FLOW.png](imgs/RAG_FLOW.png)
+**SmartCustoms-Assistant** is a **Retrieval-Augmented Generation (RAG) chatbot** project focused on assisting users with **import/export regulations, customs procedures, and goods classification**. The chatbot leverages a **Large Language Model (LLM)** as its “brain” to generate responses, combined with a vector-embedded data store for efficient information retrieval.
 
-## 1. Mục tiêu
-- Tự động trả lời các câu hỏi liên quan đến quy định xuất nhập khẩu, thủ tục hải quan, mã HS, giấy tờ cần thiết, v.v.
-- Tối ưu độ chính xác bằng cách tận dụng Cross-Encoder reranking và Rephrase LLM để hiểu đúng truy vấn người dùng.
-- Xử lý đa dạng nguồn dữ liệu: Từ file Excel (dữ liệu có cấu trúc) đến tài liệu PDF/Word (dữ liệu bán cấu trúc hoặc phi cấu trúc).
+![RAG_FLOW.png](:/37d56ede98d241b8aa1dbaa324326950)
 
-## 2. Kiến trúc tổng quan
-Dự án chia thành các bước chính như sau:
+---
 
-Data Ingestion
+## 1. Objectives
+- **Automatically answer** questions about **import/export regulations**, **customs procedures**, **HS codes**, and required documents.  
+- **Optimize accuracy** by leveraging **Cross-Encoder reranking** and **Rephrase LLM** to properly interpret user queries.  
+- **Handle diverse data sources**: from Excel files (structured data) to PDF/Word documents (semi-structured or unstructured data).
 
-Dữ liệu được bên yêu cầu cung cấp dưới các dạng: `.pdf`, `x.lsx`, `.doc`, `.docx`
-Mỗi loại file được chuyển qua Preprocessor chuyên biệt.
-Chunking & Preprocessing
+---
 
-Excel (structured data): chunk theo mỗi dòng (row-based).
-Unstructured data (PDF, DOC): chunk theo semantic chunking hoặc kích thước cố định + overlapping.
-Kết quả là các “đoạn văn bản” (chunks) đã được làm sạch, sẵn sàng cho bước embedding.
-Embedding
+## 2. Overall Architecture
+The project consists of several key steps:
 
-Sử dụng Embedding Model (ví dụ: text-embedding-ada-002) để chuyển các chunk thành vector.
-Lưu trữ vector này vào Vector DB (Qdrant, Pinecone, FAISS, v.v.).
-Query → Rephrase LLM
+### Data Ingestion
+- Data provided by stakeholders come in various formats: `.pdf`, `.xlsx`, `.doc`, `.docx`.
+- Each file type is processed by a specialized **Preprocessor**.
 
-Người dùng gửi câu hỏi → LLM tái diễn giải (rephrase) truy vấn để chuẩn hóa, tăng độ chính xác khi tìm kiếm.
-Similarity Search
+### Chunking & Preprocessing
+- **Excel (structured data)**: chunk by rows (row-based).
+- **Unstructured data (PDF, DOC)**: chunk by **semantic chunking** or fixed-size with overlapping.
+- The result is a collection of **cleaned “text chunks”** ready for embedding.
 
-Từ truy vấn đã rephrase, mô hình embedding → vector, tìm top k chunk tương tự nhất trong Vector DB.
-Cross-Encoder Reranking
+### Embedding
+- Use an **Embedding Model** (e.g., `text-embedding-ada-002`) to convert chunks into vectors.
+- Store these vectors in a **Vector DB** (Qdrant, Pinecone, FAISS, etc.).
 
-Cross-Encoder đánh giá lại mức độ liên quan của từng chunk, sắp xếp chính xác hơn.
-Lấy top n chunk cuối cùng để cung cấp cho LLM.
-LLM Generation
+### Query → Rephrase LLM
+- The user sends a query → The LLM **rephrases** it to standardize and improve search accuracy.
 
-LLM đọc các chunk liên quan (context) → Sinh câu trả lời.
-Người dùng nhận được phản hồi cuối cùng.
+### Similarity Search
+- Convert the rephrased query into a vector via the embedding model, then retrieve the **top k** most similar chunks from the Vector DB.
 
-## Pipelines xử lý
+### Cross-Encoder Reranking
+- A Cross-Encoder **re-evaluates** each chunk’s relevance, providing a more precise ranking.
+- Select the final **top n** chunks to feed into the LLM.
 
-![pipelines.png](imgs/pipelines.png)
+### LLM Generation
+- The LLM reads the relevant chunks (context) → **generates an answer**.
+- The user receives the final response.
+
+---
+
+## 3. Processing Pipelines
+
+![pipelines.png](:/91a6b3a904344322bf2ca654be7901cf)
 
 ### 1. PDF
 
+![PDF_FLOW.png](:/99d06dabcaf24badad1cd59e11b194c9)
 
-![PDF_FLOW.png](imgs/PDF_FLOW.png)
+- **Data Source**: PDF files that are actually scanned images, meaning traditional PDF-reading methods do not apply (no hidden text layer).
+- **Requirement**: Extract text with high accuracy, especially regarding dates and crucial references (circular numbers, etc.).
 
-### Bối cảnh và vấn đề
+Below is a sample dataset (in reality, the provided data may be less “clean”):
 
-- **Nguồn dữ liệu**: Các file PDF dạng ảnh chụp (*scanned PDF*), không thể áp dụng các phương pháp đọc PDF truyền thống (vì không có lớp text ẩn).  
-- **Yêu cầu**: Trích xuất văn bản với độ chính xác cao, đặc biệt về ngày tháng và các thông tin quan trọng về số thông tư, ...
+<img src=":/e23339ce3aa64b1b863fc47aafeab9f4" alt="pdf_sample" width="500">
 
-Dưới đây là một ví dụ về dữ liệu (thực tế dữ liệu được cung cấp không đẹp như vậy):
+#### Approach
 
-<img src="imgs/pdf_sample.png" alt="pdf_sample" width="450">
+1. **Treat PDFs as images**  
+   - Instead of viewing them as text documents, treat them as a collection of images.  
+   - **Goal**: Extract content via OCR to obtain the necessary text.
 
+2. **Use GPT-4**  
+   - GPT-4 is chosen for its high accuracy, especially for complex data (dates, codes, etc.).  
+   - **Issue**: GPT-4 may refuse to process images containing official seals, signatures, etc. due to safety/security policy.
+
+3. **Workaround with YOLO OCR**  
+   - Train a YOLO OCR model to **detect** (bounding boxes) official seals and signatures in the images.  
+   - **Fill** (white-box) those detected areas → removing sensitive content before sending the image to GPT-4.  
+   - **Result**: A “cleaned” image without stamps/signatures → GPT-4 accepts it and can extract text.
+
+4. **Build and label the dataset**  
+   - Use **Roboflow** to build and manually label bounding boxes for seals and signatures.  
+   - Ensure enough variety in shapes, positions, and colors to train YOLO OCR effectively.
+
+5. **Extract Text from Images**  
+   - Extract text using GPT-4 (once the image is cleaned).  
+   - The result is formatted in Markdown to preserve as much of the original structure as possible.
+
+6. **Chunking**  
+   - **Data specifics**: Typically, these documents are circulars, notices, etc., often 1–2 pages. However, some may have multiple pages, resulting in a higher token count.  
+   - **Implementation**:  
+     - Split by token threshold: if text exceeds a set limit, chunk based on predefined rules.  
+     - Overlap between chunks: consecutive chunks overlap to maintain context and avoid missing crucial info.
 
 ---
 
-### Phương án tiếp cận
-
-1. **Xử lý PDF như ảnh**  
-   - Thay vì coi PDF là tài liệu văn bản, ta coi chúng như một tập hợp các hình ảnh.  
-   - **Mục tiêu**: Trích xuất nội dung bằng OCR để lấy được văn bản cần thiết.
-
-2. **Sử dụng GPT-4**  
-   - Lý do chọn GPT-4: Độ chính xác cao, đặc biệt với dữ liệu có cấu trúc phức tạp (ngày tháng, mã số...).  
-   - **Vấn đề**: GPT-4 từ chối xử lý ảnh có dấu mộc, chữ ký… do vi phạm chính sách an toàn/bảo mật.
-
-3. **Khắc phục bằng mô hình YOLO OCR**  
-   - Huấn luyện mô hình YOLO OCR để **phát hiện (detect)** vị trí các dấu mộc, chữ ký trên ảnh (thông qua bounding box).  
-   - **Xóa (fill) khu vực phát hiện** thành màu trắng (*white box*) → Loại bỏ nội dung nhạy cảm trước khi gửi ảnh vào GPT-4.  
-   - **Kết quả**: Ảnh “làm sạch” không còn dấu mộc, chữ ký → GPT-4 chấp nhận xử lý và trích xuất văn bản.
-
-4. **Xây dựng và gán nhãn bộ dữ liệu**  
-   - Sử dụng **Roboflow** để xây dựng tập dữ liệu và gán nhãn thủ công (annotate bounding box cho vùng dấu mộc, chữ ký).  
-   - Tạo tập dữ liệu đủ đa dạng về hình dạng, vị trí, màu sắc của dấu mộc/chữ ký, giúp YOLO OCR học nhận diện chính xác.
-
-
-5. **Extract Text từ Hình Ảnh**
-	- Trích xuất văn bản từ ảnh sử dụng GPT-4o. Kết quả trả về được định dạng dưới dạng Markdown nhằm bảo toàn tối đa cấu trúc ban đầu của dữ liệu.
-
-6. **Chunking**
-
-	- Đặc thù dữ liệu:
-		Thông thường, các tài liệu là thông tư, thông báo,... chỉ chiếm từ 1 đến 2 trang PDF.
-		Tuy nhiên, có trường hợp tài liệu có thể bao gồm nhiều trang, dẫn đến số lượng token cao hơn.
-	- Phương pháp thực hiện:
-	Chia theo ngưỡng token: Khi số lượng token vượt qua giới hạn đặt sẵn, dữ liệu sẽ được chia thành các chunk dựa trên các quy tắc định nghĩa.
-Overlap giữa các chunk: Các chunk trong cùng một tài liệu sẽ có phần chồng lấn nhằm đảm bảo tính liên tục và không bỏ sót thông tin quan trọng.
----
-###  Tham khảo & liên kết
-
-- **Raw Data & Notebook Chuẩn bị data**  
+#### References & Links
+- **Raw Data & Data Preparation Notebook**  
   [Drive Link](https://drive.google.com/drive/folders/1nD3ke0PfkfS4P8bNWKQwbXDsn6vUw1aR?usp=sharing)
 
 - **Dataset (Roboflow)**  
-  [Dataset Link](https://app.roboflow.com/watermarkdetect/watermark-signature/browse?queryText=&pageSize=50&startingIndex=0&browseQuery=true)
+  [Dataset Link](https://universe.roboflow.com/watermarkdetect/watermark-signatur)
 
-- **Original data (Cẩm nang XNK - Bộ Tài Chính)**
-	[Original Data Link](https://camnangxnk-logistics.net/tai-lieu-xuat-nhap-khau/bo-tai-chinh/)
-
- 
-### 2. XLSX
-![XLSX_FLOW.png](imgs/XLSX_FLOW.png)
-
-### Bối cảnh và vấn đề
-
-Nguồn dữ liệu: Các file Excel (xlsx) chứa thông tin cần trích xuất, bao gồm nhiều cột với kiểu dữ liệu khác nhau (ngày tháng, số, chuỗi...).
-Dưới đây là một ví dụ về dữ liệu:
-
-
-![xlsx_sample.png](imgs/xlsx_sample.png)
-
-1. Xử lý file Excel bằng Pandas
-Đọc file Excel bằng pd.read_excel(...).
-Chuyển toàn bộ dữ liệu thành một DataFrame để thuận tiện thao tác.
-2. Tiền xử lý dữ liệu
-Loại bỏ giá trị trống (bằng cách điền "" cho cột dạng số hoặc chuỗi).
-Chuyển đổi và định dạng lại cột ngày tháng .
-3. Chunking
-	Chia dữ liệu theo các hàng , với mỗi chunk gồm: `Ngày`,  `Nhà cung cấp`,	`Hs code`,	`Tên hàng`,	`Lượng`,  `Đơn vị tính`, 	`Tên nuớc xuất xứ`, ...
-
-## 3. DOC - DOCX
-
-![DOC_FLOW.png](imgs/DOC_FLOW.png)
-
-### Bối cảnh và Yêu cầu
-
-- **Nguồn dữ liệu**: Các file Word (DOC hoặc DOCX) chứa văn bản cần xử lý. Thường là các NGHỊ ĐỊNH của CHÍNH PHỦ
-
-Dưới đây là một ví dụ về dữ liệu:
-
-<img src="imgs/doc_sample.png" alt="pdf_sample" width="450">
+- **Original Data (Import-Export Handbook - Ministry of Finance)**  
+  [Original Data Link](https://camnangxnk-logistics.net/tai-lieu-xuat-nhap-khau/bo-tai-chinh/)
 
 ---
 
-### Phương Án Tiếp Cận
+### 2. XLSX
 
-1. **Chuyển đổi file DOC sang DOCX**  
-   - Sử dụng LibreOffice trong chế độ headless để chuyển đổi file DOC sang DOCX.  
-   - Tạo thư mục tạm để lưu trữ file DOCX chuyển đổi.
+![XLSX_FLOW.png](:/e8cc6d1b707c4f7e879d04e05638a9df)
 
-2. **Đọc Nội Dung File Word**  
-   - Dùng `UnstructuredWordDocumentLoader` để load nội dung từ file DOCX.  
-   - Nếu file gốc là DOC, chuyển đổi sang DOCX trước khi đọc.
+- **Data Source**: Excel (`.xlsx`) files containing relevant information across multiple columns (dates, numbers, strings, etc.).
+- Sample data:
 
-3. **Phân Đoạn Văn Bản**  
-   - Áp dụng biểu thức chính quy để chia văn bản thành các đoạn dựa trên các quy tắc (ví dụ: “Điều …”, “Khoản …”, “Mẫu số …”).  
-   - Làm sạch và chuẩn hoá các đoạn văn (loại bỏ khoảng trắng thừa).
+![xlsx_sample.png](:/a7e83af170b64d9dbb965f36eaad8bbc)
 
-4. **Chia Nhỏ (Chunking) và Xử Lý Đoạn Văn**  
-   - Đo số token của mỗi đoạn.  
-   - Nếu số token vượt ngưỡng quy định, chia đoạn thành các chunk nhỏ theo số lượng token.  
-   - Áp dụng kỹ thuật overlap giữa các chunk để đảm bảo tính liên tục của nội dung.
+#### Approach
+
+1. **Handle Excel files via Pandas**  
+   - Read the file with `pd.read_excel(...)`.  
+   - Convert everything into a DataFrame for convenient manipulation.
+
+2. **Data Preprocessing**  
+   - Remove or replace empty values (fill `""` for numeric or string columns).  
+   - Convert and reformat date columns.
+
+3. **Chunking**  
+   - Typically done by **rows**: each row might include fields like `Date`, `Supplier`, `Hs code`, `Item Name`, `Quantity`, `Unit`, `Country of Origin`, etc.
+
+---
+
+### 3. DOC - DOCX
+
+![DOC_FLOW.png](:/36d9a48f03684cfdabac8ff25464dbde)
+
+- **Data Source**: Word files (`.doc` or `.docx`) containing text, often government decrees from the Ministry of Finance or similar.
+
+Sample data:
+
+<img src=":/2926822fccdd425d9f7881341653f663" alt="pdf_sample" width="500">
+
+#### Approach
+
+1. **Convert DOC to DOCX**  
+   - Use LibreOffice in headless mode to convert `.doc` → `.docx`.  
+   - Store the converted DOCX in a temporary folder.
+
+2. **Read Word file content**  
+   - Use `UnstructuredWordDocumentLoader` to load content from DOCX.  
+   - If the original file is DOC, convert it first.
+
+3. **Split text**  
+   - Apply regex to split text by “Điều …”, “Khoản …”, “Mẫu số …” or relevant markers.  
+   - Clean up extra whitespace.
+
+4. **Chunking & Handling Long Sections**  
+   - Measure token count per section.  
+   - If a section is too long, split it into smaller chunks with some overlap to maintain continuity.
+
+---
+
+## RAG Pipeline
+
+### 1. `VectorStoreManager`
+- Manages **storage** and **retrieval** of vector embeddings via **Qdrant**.  
+- Creates a Qdrant collection (if missing) based on **embedding dimensions**.  
+- Stores text and metadata as vectors, enabling **similarity search**.
+
+### 2. `CrossReranker`
+- Improves **accuracy** by **re-ranking** the retrieved documents.  
+- Uses a **CrossEncoder** model (PhoRanker) to score query-document relevance.  
+- Sorts results in descending order of relevance to pick the most fitting docs.
+
+### 3. `SearchEngine`
+- Uses the VectorStore for **initial retrieval** and filters them by threshold.  
+- Retrieves top-k documents (by similarity), then discards those below the threshold.  
+
+---
+
+## LLM Pipeline
+
+- **(1) DataLoader**  
+  - Converts **JSON data** (from processed PDF, DOCX, XLSX) into lists of text and metadata.
+
+- **(2) EmbeddingGenerator**  
+  - Calls **OpenAI Embeddings** to turn text into vectors, supporting batch splitting and retries.
+
+- **(3) LangChainGenerator**  
+  - Uses **ChatOpenAI** to generate final answers.  
+  - If RAG-provided documents exist, it answers based on them; otherwise, it relies on general knowledge.  
+  - Maintains a short **conversation history** and outputs results in Markdown.
+
+---
+
+## Key Functionalities
+
+![API.png](:/84b152265e554fedbdcf3381956fc302)
+
+### 1. Chat Endpoint
+- **Route**: `POST /chat`  
+- **Description**:  
+  - Maintains a conversation (session) via the `session_id` cookie.  
+  - If no `session_id` exists, the system automatically creates one and sets the cookie.  
+  - Allows the chatbot to remember the last 3 interactions and provide answers based on the RAG pipeline (retriever + CrossReranker).
+
+---
+
+### 2. List Uploaded Files
+- **Route**: `GET /uploaded-files`  
+- **Description**:  
+  - Returns a list of files currently in `data/uploaded`.  
+  - Each file has: `file_name` (no extension), `file_type` (extension), and the full file name (`file`).
+
+---
+
+### 3. Delete Uploaded File
+- **Route**: `DELETE /delete-uploaded-file`  
+- **Description**:  
+  - Receives `file_name` and `file_type` to delete.  
+  - Removes associated vectors in Qdrant (via metadata) and deletes the physical file in `data/uploaded`.  
+  - Responds with “Deleted” status and file info.
+
+---
+
+### 4. Upload & Process DOC/DOCX
+- **Route**: `POST /upload` (Doc endpoint)  
+- **Description**:  
+  - Accepts `.doc` or `.docx` only (size ≤ 10MB).  
+  - Saves the file to `data/uploaded`, then runs `doc_processor_pipeline` to convert content into JSON.  
+  - Uses `DataLoader` to extract text, create embeddings, and store in Qdrant.  
+  - Returns “Processed, embeddings created and saved to Qdrant”.
+
+---
+
+### 5. Upload & Process PDF
+- **Route**: `POST /upload` (PDF endpoint)  
+- **Description**:  
+  - Accepts `.pdf` only (size ≤ 10MB).  
+  - Saves the file to `data/uploaded`, then runs `pdf_processor_pipeline`.  
+  - Produces JSON, then creates embeddings and stores them in Qdrant.  
+  - Returns “Processed, embeddings created and saved to Qdrant”.
+
+---
+
+### 6. Upload & Process XLSX
+- **Route**: `POST /upload` (XLSX endpoint)  
+- **Description**:  
+  - Accepts `.xlsx` only (size ≤ 10MB).  
+  - Saves the file to `data/uploaded`, runs `xlsx_processor_pipeline` to convert content into JSON.  
+  - Uses `DataLoader` to extract text, create embeddings, and store them in Qdrant.  
+  - Returns “Processed, embeddings created and saved to Qdrant”.
