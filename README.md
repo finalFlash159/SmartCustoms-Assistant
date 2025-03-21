@@ -116,6 +116,9 @@ Below is a sample dataset (in reality, the provided data may be less “clean”
 ---
 
 #### References & Links
+- **Notebooks finetune yolov12**
+   [Notebook Link](https://colab.research.google.com/drive/1dUP-S6qI0NOBPJUxsU7hDnHwUFXBZ_K9?authuser=2)
+
 - **Raw Data & Data Preparation Notebook**  
   [Drive Link](https://drive.google.com/drive/folders/1nD3ke0PfkfS4P8bNWKQwbXDsn6vUw1aR?usp=sharing)
 
