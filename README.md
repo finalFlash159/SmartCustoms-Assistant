@@ -8,8 +8,14 @@ To **enhance factual accuracy and reduce hallucinations** in specialized customs
 
 This design **significantly improves information accuracy and domain-specific reliability**, making **SmartCustoms-Assistant** a powerful tool for supporting **professional customs consulting and compliance workflows**.
 
-<!-- TOC -->- [Smart Customs Assistant](#smart-customs-assistant)
+![rag_flow.png](imgs/rag_flow.png)
+
+
+---
+## Table of Content
+<!-- TOC -->
 - [Smart Customs Assistant](#smart-customs-assistant)
+  - [Table of Content](#table-of-content)
   - [Objectives](#objectives)
   - [Overall Architecture](#overall-architecture)
     - [Data Ingestion](#data-ingestion)
@@ -67,11 +73,6 @@ This design **significantly improves information accuracy and domain-specific re
     - [📽️ Demo](#️-demo)
 
 <!-- /TOC -->
-
-![rag_flow.png](imgs/rag_flow.png)
-
-
-
 ---
 
 ## Objectives
