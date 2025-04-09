@@ -558,7 +558,7 @@ These services are allocated into pools to support concurrent processing and red
 ## 👥 Contributors
 
 ### [Vo Minh Thinh](https://github.com/finalFlash159)  
-[![GitHub](https://img.shields.io/badge/GitHub-finalFlash159-181717?style=flat&logo=github)](https://github.com/finalFlash159)  [![LinkedIn](https://img.shields.io/badge/LinkedIn-ThinhVoMinh-blue?style=flat&logo=linkedin)](www.linkedin.com/in/vmthinh)
+[![GitHub](https://img.shields.io/badge/GitHub-finalFlash159-181717?style=flat&logo=github)](https://github.com/finalFlash159)  [![LinkedIn](https://img.shields.io/badge/LinkedIn-ThinhVoMinh-blue?style=flat&logo=linkedin)](https://www.linkedin.com/in/vmthinh)
 
 **Responsibilities:**
 -  System Design & Architecture  
@@ -570,7 +570,7 @@ These services are allocated into pools to support concurrent processing and red
 ---
 
 ###  [Tran Quoc Toan](https://github.com/tqtcse)  
-[![GitHub](https://img.shields.io/badge/GitHub-tqtcse-181717?style=flat&logo=github)](https://github.com/tqtcse)  [![LinkedIn](https://img.shields.io/badge/LinkedIn-TranQuocToan-blue?style=flat&logo=linkedin)](www.linkedin.com/in/tqtcse)
+[![GitHub](https://img.shields.io/badge/GitHub-tqtcse-181717?style=flat&logo=github)](https://github.com/tqtcse)  [![LinkedIn](https://img.shields.io/badge/LinkedIn-TranQuocToan-blue?style=flat&logo=linkedin)](ttps://www.linkedin.com/in/tqtcse)
 
 **Responsibilities:**
 -  UI/UX Design  
