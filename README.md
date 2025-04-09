@@ -570,7 +570,7 @@ These services are allocated into pools to support concurrent processing and red
 ---
 
 ###  [Tran Quoc Toan](https://github.com/tqtcse)  
-[![GitHub](https://img.shields.io/badge/GitHub-tqtcse-181717?style=flat&logo=github)](https://github.com/tqtcse)  [![LinkedIn](https://img.shields.io/badge/LinkedIn-TranQuocToan-blue?style=flat&logo=linkedin)](ttps://www.linkedin.com/in/tqtcse)
+[![GitHub](https://img.shields.io/badge/GitHub-tqtcse-181717?style=flat&logo=github)](https://github.com/tqtcse)  [![LinkedIn](https://img.shields.io/badge/LinkedIn-TranQuocToan-blue?style=flat&logo=linkedin)](https://www.linkedin.com/in/tqtcse)
 
 **Responsibilities:**
 -  UI/UX Design  
