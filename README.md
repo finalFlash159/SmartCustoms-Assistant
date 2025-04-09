@@ -93,13 +93,13 @@ The project follows a modular architecture with the following key stages:
 - Each format is handled by a dedicated **Preprocessor** that extracts and prepares the content accordingly.
 
 ### Chunking & Preprocessing
-- **Structured data (Excel)**: split into row-based chunks.
+- **Structured data (Excel)**: apply preprocessing and normalization (e.g., correcting input errors, standardizing formats), then store cleaned data in MySQL.
 - **Unstructured data (PDF, Word)**: use **semantic chunking** or sliding-window chunking with overlap.
 - The output is a set of cleaned and normalized **text chunks** ready for vectorization.
 
 ### Embedding
 - Use an **embedding model** ( `text-embedding-3-large`) to convert each chunk into a vector.
-- Store vectors in a **Vector Database** (Qdrant, Pinecone, or FAISS) for fast similarity search.
+- Store vectors in a **Vector Database** (Qdrant,) for fast similarity search.
 
 ### Query → Similarity Search
 - The user submits a query.
