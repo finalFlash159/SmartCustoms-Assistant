@@ -26,6 +26,7 @@ This design **significantly improves information accuracy and domain-specific re
     - [Tool-Agent Support](#tool-agent-support)
     - [LLM Generation](#llm-generation)
     - [Tracing \& Monitoring](#tracing--monitoring)
+  - [App Structure](#app-structure)
   - [Pipelines](#pipelines)
     - [Preprocessing pipelines](#preprocessing-pipelines)
       - [PDF](#pdf)
@@ -125,6 +126,66 @@ The project follows a modular architecture with the following key stages:
 - Track prompt flows, latency, and intermediate states for better observability and iterative improvement.
 
 
+---
+
+##  App Structure
+
+```
+app/                            
+├── api/                        - Contains the application's API endpoints
+│   ├── chat_endpoint.py        - Handles chat-related API endpoints
+│   ├── delete_endpoint.py      - Manages delete operations via API
+│   ├── doc_endpoint.py         - Processes DOC document-related API requests
+│   ├── pdf_endpoint.py         - Manages PDF-related API endpoints 
+│   ├── xlsx_delete.py          - Handles deletion of xlsx data on MySQL
+│   └── xlsx_endpoint.py        - Processes Excel file-related API endpoints
+│
+├── config.py                   - Configuration settings
+│
+├── data/                       - Stores uploaded data
+│   └── uploaded/               - Subdirectory for uploaded files
+│
+├── main.py                     - Application deployment
+│
+├── models/                     - Contains AI/ML models
+│   └── yolov11_tuned.pt        - Fine-tuned YOLOv11 model for object detection
+│
+├── pipelines/                  - Organizes data processing workflows
+│   ├── doc_pipelines/          - Handles doc, docx document processing
+│   │   └── doc_processor.py    - Document processing logic
+│   ├── llm_pipelines/          - Large Language Model (LLM) processing
+│   │   ├── agent_decision.py   - Decision-making logic for agents
+│   │   ├── data_preparation.py - Prepares data for LLM processing
+│   │   ├── embedding_generator.py - Generates embeddings from data
+│   │   └── response_generator.py - Generates responses using LLM
+│   ├── pdf_pipelines/          - Handles PDF document processing
+│   │   ├── gpt_ocr.py          - Uses GPT for optical character recognition (OCR) on PDFs
+│   │   ├── image_processor.py  - Processes images from PDFs
+│   │   ├── pdf_processor.py    - PDF document processing logic
+│   │   └── yolo_detector.py    - Uses YOLO for object detection in PDF images
+│   ├── rag_pipelines/          - Supports advanced retrieval (RAG)
+│   │   ├── cohere_reranker.py  - Uses Cohere to rerank results
+│   │   ├── search_engine.py    - Search engine using RAG techniques
+│   │   └── vector_store.py     - Manages storage of embedding vectors
+│   └── xlsx_pipelines/         - Handles Excel document processing
+│       └── xlsx_processor.py   - Excel document processing logic
+│
+├── tools/                      - Contains tools for embedding into Agent
+│   ├── hscode.py               - Core HS code processing
+│   ├── hscode_status.py        - HS code status processing
+│   ├── hscode_supplier.py      - HS code logic related to suppliers
+│   ├── hscode_supplier_date_status.py - HS code by supplier, date, and status
+│   ├── hscode_supplier_daterange_status.py - HS code by date range and status
+│   ├── hscode_supplier_status.py - HS code by supplier and status
+│   ├── productname.py          - Product name processing
+│   ├── supplier_resolver.py    - Resolves supplier information (using fuzzy matching)
+│
+├── utils/                      - Provides utility tools
+│   ├── db_connector.py         - Database connection logic
+│   └── hscode_formatter.py     - Formats results from queries
+│
+└── requirements.txt            - List of project dependencies
+```
 ---
 
 ## Pipelines
