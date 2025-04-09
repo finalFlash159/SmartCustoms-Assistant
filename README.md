@@ -288,7 +288,7 @@ Validate column types and schema constraints before writing to the table.
 
 Sample data:
 
-<img src="imgs/doc_sample.png" alt="pdf_sample" width="500">
+<img src="imgs/doc_sample.png" alt="doc_sample" width="500">
 
 ##### Approach
 
