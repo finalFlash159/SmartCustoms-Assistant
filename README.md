@@ -346,6 +346,8 @@ Sample data:
   - Manages and integrates various specialized tools (e.g., HSCodeTool, ProductNameSearchTool) for querying HS codes, product names, supplier data, etc.
   - Initializes an agent (using OpenAI functions) that dynamically decides whether to invoke a tool based on the user query and aggregates the results accordingly.
 
+---
+
 ### Tools
 #### Database (Create table in MySQL)
 ```mysql
@@ -370,6 +372,8 @@ CREATE TABLE IF NOT EXISTS import_data (
 ALTER TABLE import_data
 ADD COLUMN TinhTrang VARCHAR(50);
 ```
+
+---
 
 #### Techniques Used:
 
@@ -521,7 +525,7 @@ ADD COLUMN TinhTrang VARCHAR(50);
   - Step-by-step reasoning process followed by the Agent.
   - Detailed logs of all **Tool Calls**, including input/output for components like MySQL queries, OCR processing, and HS Code lookups.
 
-
+---
 
 ##  Application Deployment Strategy
 
@@ -549,6 +553,8 @@ These services are allocated into pools to support concurrent processing and red
 - Optimizes memory and concurrency performance.
 - Ensures scalability for multi-user, multi-step workflows (e.g. retrieval, rerank, tool chaining).
 
+---
+
 ## 👥 Contributors
 
 ### [Vo Minh Thinh](https://github.com/finalFlash159)  
@@ -571,6 +577,8 @@ These services are allocated into pools to support concurrent processing and red
 -  User Database & Account Management  
 -  QR Code Payment Integration  
 -  Frontend–Backend Integration
+
+---
 
 ## Demo Deplpyment
 ### 📽️ Demo
