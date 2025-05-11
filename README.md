@@ -70,6 +70,14 @@ This design **significantly improves information accuracy and domain-specific re
   - [👥 Contributors](#-contributors)
     - [Vo Minh Thinh](#vo-minh-thinh)
     - [Tran Quoc Toan](#tran-quoc-toan)
+  - [SmartCustoms Assistant v1.1 - Update](#smartcustoms-assistant-v11---update)
+    - [🔄 Database Migration: MySQL → MongoDB](#-database-migration-mysql-→-mongodb)
+    - [🤖 Automated AggregatePipelineGenerator](#-automated-aggregatepipelinemodule)
+    - [🧠 Coordinator Architecture](#-coordinator-architecture)
+    - [📊 Smart Query Enhancements](#-smart-query-enhancements)
+    - [⚙️ System Architecture Improvements](#-system-architecture-improvements)
+    - [📝 New API Endpoints](#-new-api-endpoints)
+    - [🧰 Enhanced Prompting Tools](#-enhanced-prompting-tools)
   - [Demo Deplpyment](#demo-deplpyment)
     - [📽️ Demo](#️-demo)
 
@@ -107,7 +115,7 @@ The project follows a modular architecture with the following key stages:
 - The query is embedded and used to search the **top-k most similar chunks** in the Vector DB.
 
 ### Cohere Rerank
-- To reduce latency while maintaining relevance, **Cohere’s Rerank API** is used instead of traditional Cross-Encoders.
+- To reduce latency while maintaining relevance, **Cohere's Rerank API** is used instead of traditional Cross-Encoders.
 - The top-k results are reranked to find the **top-n** most relevant chunks for final use.
 
 ### Tool-Agent Support
@@ -201,7 +209,7 @@ app/
 - These are scanned-image PDFs with no embedded text layer, which makes standard text-based parsing methods ineffective.  
 - **Requirement**: Extract text with high accuracy, especially regarding dates and crucial references (circular numbers, etc.).
 
-Below is a sample dataset (in reality, the provided data may be less “clean”):
+Below is a sample dataset (in reality, the provided data may be less "clean"):
 
 <div style="display: flex; justify-content: space-between;">
   <img src="imgs/pdf1_sample.png" alt="pdf_sample" width="50%">
@@ -362,7 +370,7 @@ Sample data:
    - If the original file is DOC, convert it first.
 
 **Split text**  
-   - Apply regex to split text by “Điều …”, “Khoản …”, “Mẫu số …” or relevant markers.  
+   - Apply regex to split text by "Điều …", "Khoản …", "Mẫu số …" or relevant markers.  
    - Clean up extra whitespace.
 
 **Chunking & Handling Long Sections**  
@@ -525,7 +533,7 @@ ADD COLUMN TinhTrang VARCHAR(50);
 - **Description**:  
   - Receives `file_name` and `file_type` to delete.  
   - Removes associated vectors in Qdrant (via metadata) and deletes the physical file in `data/uploaded`.  
-  - Responds with “Deleted” status and file info.
+  - Responds with "Deleted" status and file info.
 
 ---
 
@@ -535,7 +543,7 @@ ADD COLUMN TinhTrang VARCHAR(50);
   - Accepts `.doc` or `.docx` only (size ≤ 10MB).  
   - Saves the file to `data/uploaded`, then runs `doc_processor_pipeline` to convert content into JSON.  
   - Uses `DataLoader` to extract text, create embeddings, and store in Qdrant.  
-  - Returns “Processed, embeddings created and saved to Qdrant”.
+  - Returns "Processed, embeddings created and saved to Qdrant".
 
 ---
 
@@ -545,7 +553,7 @@ ADD COLUMN TinhTrang VARCHAR(50);
   - Accepts `.pdf` only (size ≤ 10MB).  
   - Saves the file to `data/uploaded`, then runs `pdf_processor_pipeline`.  
   - Produces JSON, then creates embeddings and stores them in Qdrant.  
-  - Returns “Processed, embeddings created and saved to Qdrant”.
+  - Returns "Processed, embeddings created and saved to Qdrant".
 
 ---
 
@@ -616,6 +624,137 @@ These services are allocated into pools to support concurrent processing and red
 
 ---
 
+## Demo Deplpyment
+### 📽️ Demo
+
+Click the image below to watch a short demo of SmartCustoms-Assistant in action:
+
+[![SmartCustoms Assistant Demo](https://img.youtube.com/vi/UCloHEqrPbQ/hqdefault.jpg)](https://www.youtube.com/watch?v=UCloHEqrPbQ)
+
+---
+
+## SmartCustoms Assistant v1.1 - Update
+
+The **SmartCustoms-Assistant v1.1** version includes significant improvements to enhance performance, accuracy, and scalability. Below are the key changes compared to the previous version:
+
+### 🔄 Database Migration: MySQL → MongoDB
+
+- **Complete transition** from MySQL to **MongoDB** to leverage powerful vector search and text search capabilities.
+- Integration with **MongoDB Atlas Vector Search** allowing efficient similarity and fuzzy matching.
+- Improved structured data search performance with better scalability.
+
+### 🤖 Automated AggregatePipelineGenerator
+
+- Introduction of **AggregatePipelineGenerator** - a tool that uses LLM to create complex MongoDB search pipelines from user queries.
+- Support for multiple search types:
+  - **Fuzzy search** with customizable parameters (maxEdits, prefixLength, maxExpansions)
+  - **Regex search** for complex patterns
+  - **Exact matching** for specific fields
+  - **Range queries** especially for time periods
+
+### 🧠 Coordinator Architecture
+
+- Added **Coordinator** module to orchestrate optimal query processing strategies:
+  - Determines when to use Vector Search and when to use MongoDB Search
+  - Analyzes user queries to select the most effective search tool
+  - Optimizes information retrieval strategy based on query characteristics
+
+### 📊 Smart Query Enhancements
+
+- Implemented **Dynamic Thresholds** for fuzzy search:
+  - Pre-filtering with absolute threshold
+  - Relative filtering compared to highest search score
+- Combined **$search** and **$match** in MongoDB pipeline to optimize results
+- Support for input data transformation (such as date formatting) before searching
+
+### ⚙️ System Architecture Improvements
+
+- **Enhanced Connection Pool** design:
+  - MongoDB connection pool management with customizable configuration
+  - Optimization of pool parameters (maxPoolSize, minPoolSize, maxIdleTimeMS)
+- **Reorganized module** architecture:
+  - Added `prompts/` directory containing all templates and schemas for LLM
+  - Separated `llms/` and `mongodb/` into distinct modules
+  - Object Pool system for all heavyweight components (VectorStore, Reranker, Pipeline Generator)
+
+### 📝 New API Endpoints
+
+- Added new and improved API endpoints:
+  - `/api/chat` supporting intelligent queries via MongoDB or RAG depending on question type
+  - Document processing endpoints optimized for synchronized storage between Vector DB and MongoDB
+
+### 🧰 Enhanced Prompting Tools
+
+- Added detailed template files for MongoDB search and decision-making functionality
+- Templates are parameterized and centralized in one directory, making updates and maintenance easier
+
+---
+
+## SmartCustoms Assistant v1.1 - App Structure
+```
+app-ver-1.1/                            
+├── api/                        - API endpoints
+│   ├── chat_endpoint.py        - Handles chat-related API endpoints
+│   ├── delete_endpoint.py      - Manages delete operations via API
+│   ├── doc_endpoint.py         - Processes DOC document-related API requests
+│   ├── pdf_endpoint.py         - Manages PDF-related API endpoints 
+│   ├── xlsx_delete.py          - Handles deletion of xlsx data on MongoDB
+│   └── xlsx_endpoint.py        - Processes Excel file-related API endpoints
+│
+├── config.py                   - Enhanced configuration with MongoDB settings and pooling options
+│
+├── data/                       - Stores uploaded data
+│   └── uploaded/               - Subdirectory for uploaded files
+│
+├── llms/                       - Large Language Model (LLM) processing modules
+│   ├── aggregate_pipeline_generator.py - Generates MongoDB search pipelines using LLM
+│   ├── coordinator.py          - Decides optimal search strategy (Vector vs MongoDB)
+│   ├── embedding_generator.py  - Generates embeddings from data
+│   ├── gpt_ocr.py              - OCR processing using GPT models
+│   └── response_generator.py   - Generates responses using LLM
+│
+├── main.py                     - Application deployment with connection pool management
+│
+├── models/                     - Contains AI/ML models
+│   └── yolov11_tuned.pt        - Fine-tuned YOLOv11 model for object detection
+│
+├── mongodb/                    - MongoDB integration modules
+│   ├── mongodb_manager.py      - Manages MongoDB connections and operations
+│   └── mongodb_search.py       - Implements search functionality through MongoDB
+│
+├── pipelines/                  - Data processing workflows
+│   ├── doc_pipelines/          - Document processing for DOC/DOCX
+│   ├── pdf_pipelines/          - PDF document processing with OCR
+│   ├── rag_pipelines/          - Retrieval-Augmented Generation pipelines
+│   └── xlsx_pipelines/         - Excel processing pipelines
+│
+├── prompts/                    - Centralized prompt templates for LLMs
+│   ├── constants.py            - Constant values used in prompts
+│   ├── mongo_pipeline.py       - Templates for MongoDB pipeline generation
+│   ├── ocr_prompts.py          - Templates for OCR processing
+│   ├── response_prompts.py     - Templates for response generation
+│   ├── search_decision.py      - Templates for search decision-making
+│   └── suggestion_templates.py - Templates for suggestion generation
+│
+├── utils/                      - Utility tools and helpers
+│
+└── requirements.txt            - Project dependencies
+```
+
+The app structure of v1.1 represents a significant evolution from the original design, with key architectural improvements:
+
+1. **Separation of concerns**: The code is better organized with dedicated directories for MongoDB operations, LLM processing, and prompt templates.
+
+2. **Modular design**: Each component is isolated, making the system more maintainable and testable.
+
+3. **Enhanced configuration**: The configuration system now includes detailed settings for MongoDB, connection pools, and service parameters.
+
+4. **Centralized prompts**: All LLM prompts are stored in a dedicated `prompts/` directory, facilitating easier updates and management.
+
+5. **Coordinator pattern**: The introduction of the `coordinator.py` module enables dynamic decision-making about which search strategy is optimal for a given query.
+
+---
+
 ## 👥 Contributors
 
 ### [Vo Minh Thinh](https://github.com/finalFlash159)  
@@ -638,12 +777,3 @@ These services are allocated into pools to support concurrent processing and red
 -  User Database & Account Management  
 -  QR Code Payment Integration  
 -  Frontend–Backend Integration
-
----
-
-## Demo Deplpyment
-### 📽️ Demo
-
-Click the image below to watch a short demo of SmartCustoms-Assistant in action:
-
-[![SmartCustoms Assistant Demo](https://img.youtube.com/vi/UCloHEqrPbQ/hqdefault.jpg)](https://www.youtube.com/watch?v=UCloHEqrPbQ)
