@@ -41,7 +41,7 @@ GitPython==3.1.44
 greenlet==3.1.1
 grpcio==1.70.0
 grpcio-tools==1.70.0
-h11==0.14.0
+h11==0.16.0
 h2==4.2.0
 hpack==4.1.0
 html5lib==1.1
