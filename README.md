@@ -4,7 +4,11 @@
 
 To **enhance factual accuracy and reduce hallucinations** in specialized customs-related queries (e.g., **HS code lookup, supplier name, product description, status**, etc.), the system is integrated with a dedicated module called **ToolAgent**.
 
-**ToolAgent** plays a critical role by retrieving **exact data from the MySQL database**, supplementing the LLM with real-time factual information rather than relying solely on the model's internal knowledge or inference.
+> **Version 1.1 Update**: In the latest version, **ToolAgent now integrates with MongoDB** instead of MySQL, providing improved scalability and performance. The system now incorporates a new **Coordinator module** that intelligently decides between Vector Search and MongoDB methods based on query type.
+
+**ToolAgent** plays a critical role by retrieving **exact data from the database**, supplementing the LLM with real-time factual information rather than relying solely on the model's internal knowledge or inference.
+
+> **Version 1.1 Enhancement**: The new **AggregatePipelineGenerator** allows dynamic creation of complex MongoDB queries using LLM, supporting fuzzy search, regex patterns, exact matching, and date range queries with customizable parameters.
 
 This design **significantly improves information accuracy and domain-specific reliability**, making **SmartCustoms-Assistant** a powerful tool for supporting **professional customs consulting and compliance workflows**.
 
@@ -21,12 +25,24 @@ This design **significantly improves information accuracy and domain-specific re
     - [Data Ingestion](#data-ingestion)
     - [Chunking \& Preprocessing](#chunking--preprocessing)
     - [Embedding](#embedding)
+    - [Query Analysis & Routing (New in v1.1)](#query-analysis--routing-new-in-v11)
+    - [MongoDB Search Pipeline (New in v1.1)](#mongodb-search-pipeline-new-in-v11)
     - [Query → Similarity Search](#query--similarity-search)
     - [Cohere Rerank](#cohere-rerank)
     - [Tool-Agent Support](#tool-agent-support)
     - [LLM Generation](#llm-generation)
     - [Tracing \& Monitoring](#tracing--monitoring)
-  - [App Structure](#app-structure)
+  - [SmartCustoms Assistant v1.1 - Update](#smartcustoms-assistant-v11---update)
+    - [🔄 Database Migration: MySQL → MongoDB](#-database-migration-mysql-→-mongodb)
+    - [🤖 Automated AggregatePipelineGenerator](#-automated-aggregatepipelinemodule)
+    - [🧠 Coordinator Architecture](#-coordinator-architecture)
+    - [📊 Smart Query Enhancements](#-smart-query-enhancements)
+    - [⚙️ System Architecture Improvements](#-system-architecture-improvements)
+    - [📝 New API Endpoints](#-new-api-endpoints)
+    - [🧰 Enhanced Prompting Tools](#-enhanced-prompting-tools)
+  - [SmartCustoms Assistant v1.1 - App Structure](#smartcustoms-assistant-v11---app-structure)
+  - [SmartCustoms Assistant v1.0](#smartcustoms-assistant-v10)
+    - [App Structure](#app-structure)
   - [Pipelines](#pipelines)
     - [Preprocessing pipelines](#preprocessing-pipelines)
       - [PDF](#pdf)
@@ -70,14 +86,6 @@ This design **significantly improves information accuracy and domain-specific re
   - [👥 Contributors](#-contributors)
     - [Vo Minh Thinh](#vo-minh-thinh)
     - [Tran Quoc Toan](#tran-quoc-toan)
-  - [SmartCustoms Assistant v1.1 - Update](#smartcustoms-assistant-v11---update)
-    - [🔄 Database Migration: MySQL → MongoDB](#-database-migration-mysql-→-mongodb)
-    - [🤖 Automated AggregatePipelineGenerator](#-automated-aggregatepipelinemodule)
-    - [🧠 Coordinator Architecture](#-coordinator-architecture)
-    - [📊 Smart Query Enhancements](#-smart-query-enhancements)
-    - [⚙️ System Architecture Improvements](#-system-architecture-improvements)
-    - [📝 New API Endpoints](#-new-api-endpoints)
-    - [🧰 Enhanced Prompting Tools](#-enhanced-prompting-tools)
   - [Demo Deplpyment](#demo-deplpyment)
     - [📽️ Demo](#️-demo)
 
@@ -87,8 +95,13 @@ This design **significantly improves information accuracy and domain-specific re
 ## Objectives
 - **Instantly respond** to user queries about **import/export regulations**, **customs clearance procedures**, **HS code classification**, and required documentation.  
 - **Minimize latency** while maintaining response quality by using **Cohere Reranker** to rank relevant context efficiently.  
+  > **Version 1.1 Enhancement**: Optimized reranking process with better integration into the pool-based architecture.
 - **Integrate ToolAgent** to accurately query information related to **HS codes**, **suppliers**, **product descriptions**, and more.  
+  > **Version 1.1 Update**: Replaced MySQL with **MongoDB** and added an intelligent **Coordinator module** that acts as a router between Vector Search and MongoDB search based on query analysis. The MongoDB implementation leverages text search capabilities and aggregation pipelines for more flexible and powerful queries.
 - **Seamlessly process multiple data formats** — from structured **Excel spreadsheets** to semi-structured or unstructured formats like **PDF and Word** documents, through a unified OCR + NLP pipeline.
+  > **Version 1.1 Enhancement**: Excel data now flows into MongoDB collections with optimized indexes and search capabilities, while maintaining the robust OCR pipeline for PDF/DOCX processing.
+- **New in v1.1**: Implement **dynamic query generation** with the **AggregatePipelineGenerator**, which creates MongoDB pipelines based on LLM analysis of user queries, supporting fuzzy matching, regex patterns, exact matching, and range queries all through a coherent interface.
+- **New in v1.1**: Enhanced system architecture with a fully **asynchronous design** using connection pools for database access and object pools for heavyweight components, significantly improving concurrency and response times.
 
 
 ---
@@ -102,41 +115,173 @@ The project follows a modular architecture with the following key stages:
 - Each format is handled by a dedicated **Preprocessor** that extracts and prepares the content accordingly.
 
 ### Chunking & Preprocessing
-- **Structured data (Excel)**: apply preprocessing and normalization (e.g., correcting input errors, standardizing formats), then store cleaned data in MySQL.
+- **Structured data (Excel)**: 
+  - **v1.0**: Apply preprocessing and normalization, then store cleaned data in MySQL.
+  - **v1.1 Update**: Store normalized data in MongoDB collections with optimized indexes for full-text search.
 - **Unstructured data (PDF, Word)**: use **semantic chunking** or sliding-window chunking with overlap.
 - The output is a set of cleaned and normalized **text chunks** ready for vectorization.
 
 ### Embedding
-- Use an **embedding model** ( `text-embedding-3-large`) to convert each chunk into a vector.
-- Store vectors in a **Vector Database** (Qdrant,) for fast similarity search.
+- Use an **embedding model** (`text-embedding-3-large`) to convert each chunk into a vector.
+- Store vectors in a **Vector Database** (Qdrant) for fast similarity search.
+
+### Query Analysis & Routing (New in v1.1)
+- The **Coordinator** analyzes user queries to determine the optimal processing strategy.
+- Decides whether to use MongoDB-based search (for structured data queries) or Vector-based RAG (for unstructured knowledge queries).
+
+### MongoDB Search Pipeline (New in v1.1)
+- For structured data queries, the **AggregatePipelineGenerator** creates complex MongoDB pipelines using LLM.
+- Supports multiple search types in one interface: fuzzy search, regex patterns, exact matching, and range queries.
+- Implements **dynamic thresholds** with two-stage filtering for improved result quality.
 
 ### Query → Similarity Search
-- The user submits a query.
-- The query is embedded and used to search the **top-k most similar chunks** in the Vector DB.
+- For unstructured data queries, the user's question is embedded and used to search the **top-k most similar chunks** in the Vector DB.
 
 ### Cohere Rerank
 - To reduce latency while maintaining relevance, **Cohere's Rerank API** is used instead of traditional Cross-Encoders.
 - The top-k results are reranked to find the **top-n** most relevant chunks for final use.
 
 ### Tool-Agent Support
-- An integrated **ToolAgent** is used to assist with specific lookups, including:
-  - HS Code classifications
-  - Supplier names
-  - Product descriptions
+- **v1.0**: An integrated **ToolAgent** retrieves exact data from MySQL for specific lookups.
+- **v1.1 Update**: Replaced with direct MongoDB search capabilities, providing improved flexibility and performance.
 - This improves the **precision of factual responses** and allows for external information retrieval where needed.
 
 ### LLM Generation
-- A **Large Language Model (LLM)** uses the top-n context chunks to generate a natural-language response.
+- A **Large Language Model (LLM)** uses the retrieved context (either from Vector DB or MongoDB) to generate a natural-language response.
 - The result is returned to the user as the final answer.
 
 ### Tracing & Monitoring
 - Use **LangSmith** for tracing, debugging, and monitoring the LLM pipeline.
 - Track prompt flows, latency, and intermediate states for better observability and iterative improvement.
-
+- **v1.1 Enhancement**: Extended tracing to include MongoDB query generation and execution metrics.
 
 ---
 
-##  App Structure
+## SmartCustoms Assistant v1.1 - Update
+
+The **SmartCustoms-Assistant v1.1** version includes significant improvements to enhance performance, accuracy, and scalability. Below are the key changes compared to the previous version:
+
+### 🔄 Database Migration: MySQL → MongoDB
+
+- **Complete transition** from MySQL to **MongoDB** to leverage powerful vector search and text search capabilities.
+- Integration with **MongoDB Atlas Vector Search** allowing efficient similarity and fuzzy matching.
+- Improved structured data search performance with better scalability.
+
+### 🤖 Automated AggregatePipelineGenerator
+
+- Introduction of **AggregatePipelineGenerator** - a tool that uses LLM to create complex MongoDB search pipelines from user queries.
+- Support for multiple search types:
+  - **Fuzzy search** with customizable parameters (maxEdits, prefixLength, maxExpansions)
+  - **Regex search** for complex patterns
+  - **Exact matching** for specific fields
+  - **Range queries** especially for time periods
+
+### 🧠 Coordinator Architecture
+
+- Added **Coordinator** module to orchestrate optimal query processing strategies:
+  - Determines when to use Vector Search and when to use MongoDB Search
+  - Analyzes user queries to select the most effective search tool
+  - Optimizes information retrieval strategy based on query characteristics
+
+### 📊 Smart Query Enhancements
+
+- Implemented **Dynamic Thresholds** for fuzzy search:
+  - Pre-filtering with absolute threshold
+  - Relative filtering compared to highest search score
+- Combined **$search** and **$match** in MongoDB pipeline to optimize results
+- Support for input data transformation (such as date formatting) before searching
+
+### ⚙️ System Architecture Improvements
+
+- **Enhanced Connection Pool** design:
+  - MongoDB connection pool management with customizable configuration
+  - Optimization of pool parameters (maxPoolSize, minPoolSize, maxIdleTimeMS)
+- **Reorganized module** architecture:
+  - Added `prompts/` directory containing all templates and schemas for LLM
+  - Separated `llms/` and `mongodb/` into distinct modules
+  - Object Pool system for all heavyweight components (VectorStore, Reranker, Pipeline Generator)
+
+### 📝 New API Endpoints
+
+- Added new and improved API endpoints:
+  - `/api/chat` supporting intelligent queries via MongoDB or RAG depending on question type
+  - Document processing endpoints optimized for synchronized storage between Vector DB and MongoDB
+
+### 🧰 Enhanced Prompting Tools
+
+- Added detailed template files for MongoDB search and decision-making functionality
+- Templates are parameterized and centralized in one directory, making updates and maintenance easier
+
+---
+
+## SmartCustoms Assistant v1.1 - App Structure
+```
+app-ver-1.1/                            
+├── api/                        - API endpoints
+│   ├── chat_endpoint.py        - Handles chat-related API endpoints
+│   ├── delete_endpoint.py      - Manages delete operations via API
+│   ├── doc_endpoint.py         - Processes DOC document-related API requests
+│   ├── pdf_endpoint.py         - Manages PDF-related API endpoints 
+│   ├── xlsx_delete.py          - Handles deletion of xlsx data on MongoDB
+│   └── xlsx_endpoint.py        - Processes Excel file-related API endpoints
+│
+├── config.py                   - Enhanced configuration with MongoDB settings and pooling options
+│
+├── data/                       - Stores uploaded data
+│   └── uploaded/               - Subdirectory for uploaded files
+│
+├── llms/                       - Large Language Model (LLM) processing modules
+│   ├── aggregate_pipeline_generator.py - Generates MongoDB search pipelines using LLM
+│   ├── coordinator.py          - Decides optimal search strategy (Vector vs MongoDB)
+│   ├── embedding_generator.py  - Generates embeddings from data
+│   ├── gpt_ocr.py              - OCR processing using GPT models
+│   └── response_generator.py   - Generates responses using LLM
+│
+├── main.py                     - Application deployment with connection pool management
+│
+├── models/                     - Contains AI/ML models
+│   └── yolov11_tuned.pt        - Fine-tuned YOLOv11 model for object detection
+│
+├── mongodb/                    - MongoDB integration modules
+│   ├── mongodb_manager.py      - Manages MongoDB connections and operations
+│   └── mongodb_search.py       - Implements search functionality through MongoDB
+│
+├── pipelines/                  - Data processing workflows
+│   ├── doc_pipelines/          - Document processing for DOC/DOCX
+│   ├── pdf_pipelines/          - PDF document processing with OCR
+│   ├── rag_pipelines/          - Retrieval-Augmented Generation pipelines
+│   └── xlsx_pipelines/         - Excel processing pipelines
+│
+├── prompts/                    - Centralized prompt templates for LLMs
+│   ├── constants.py            - Constant values used in prompts
+│   ├── mongo_pipeline.py       - Templates for MongoDB pipeline generation
+│   ├── ocr_prompts.py          - Templates for OCR processing
+│   ├── response_prompts.py     - Templates for response generation
+│   ├── search_decision.py      - Templates for search decision-making
+│   └── suggestion_templates.py - Templates for suggestion generation
+│
+├── utils/                      - Utility tools and helpers
+│
+└── requirements.txt            - Project dependencies
+```
+
+The app structure of v1.1 represents a significant evolution from the original design, with key architectural improvements:
+
+1. **Separation of concerns**: The code is better organized with dedicated directories for MongoDB operations, LLM processing, and prompt templates.
+
+2. **Modular design**: Each component is isolated, making the system more maintainable and testable.
+
+3. **Enhanced configuration**: The configuration system now includes detailed settings for MongoDB, connection pools, and service parameters.
+
+4. **Centralized prompts**: All LLM prompts are stored in a dedicated `prompts/` directory, facilitating easier updates and management.
+
+5. **Coordinator pattern**: The introduction of the `coordinator.py` module enables dynamic decision-making about which search strategy is optimal for a given query.
+
+---
+
+## SmartCustoms Assistant v1.0
+
+### App Structure
 
 ```
 app/                            
@@ -236,45 +381,13 @@ Below is a sample dataset (in reality, the provided data may be less "clean"):
 - Include variety in shape, size, and color to improve YOLO detection robustness.
 
 **Extract text from cleaned image using GPT-4**  
-- Once the image is cleaned, GPT-4 is used to perform OCR.  
-- The output is formatted in **Markdown** to maintain structure (e.g., sections, bullet points).
-```python
-        # Prompt hệ thống: mô tả vai trò và nhiệm vụ của AI OCR
-        self.system_message = (
-            "Bạn là một chuyên gia OCR có kinh nghiệm cao trong việc nhận diện và trích xuất văn bản tiếng Việt từ các tài liệu phức tạp. "
-            "Bạn cần phân tích hình ảnh, nhận diện chính xác các ký tự, ngày tháng và các thông tin quan trọng khác. "
-            "Kết quả đầu ra phải rõ ràng, được phân đoạn hợp lý và giữ nguyên cấu trúc gốc của tài liệu nếu có."
-        )
-        # Nội dung hướng dẫn cho người dùng
-        self.user_text_instruction = (
-            "Hãy trích xuất toàn bộ nội dung văn bản từ ảnh được cung cấp. "
-            "Chú ý nhận diện các chi tiết quan trọng như ngày tháng và bất kỳ thông tin nào có liên quan."
-            "Đối với những tài liệu bạn không thể nhận diện, hãy trả về thông báo 'Không thể nhận diện văn bản từ ảnh này'."
-        )
-  ```
+- Once the image is cleaned, GPT-4 is used to perform OCR with specialized Vietnamese-optimized prompts.
+- The system is instructed to act as an OCR expert, focusing on accurately extracting Vietnamese text.
+- The output is formatted in **Markdown** to maintain original document structure (e.g., sections, bullet points, tables).
 
 **Fallback to Tesseract OCR**  
-- **Note**: In rare cases, GPT-4 may still reject the image due to residual sensitive content.  
-- In such cases, GPT-4 returns the response:
-
-  ```python
-  "Không thể nhận diện văn bản từ ảnh này"
-  ```
-- Use Tesseract OCR
-```python
-	            word_count = len(ocr_text.split())
-            if word_count < 20:
-                logger.info("Số từ OCR từ GPT-4o dưới 20, chuyển sang sử dụng Tesseract.")
-                # Chuyển đổi ảnh PIL thành NumPy với định dạng BGR
-                img_cv = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
-                try:
-                    # Sử dụng Tesseract cho văn bản tiếng Việt
-                    tesseract_text = pytesseract.image_to_string(img_cv, lang='vie')
-                except Exception as te:
-                    logger.error(f"Lỗi khi sử dụng Tesseract: {te}")
-                    tesseract_text = ""
-                ocr_text = tesseract_text
-```
+- If GPT-4 fails to process an image (returns "Không thể nhận diện văn bản từ ảnh này") or returns minimal text (fewer than 20 words), the system automatically falls back to Tesseract OCR.
+- Tesseract is configured with Vietnamese language support (`lang='vie'`) to maintain accuracy for local documents.
   
 **Chunking**  
    - **Data specifics**: Typically, these documents are circulars, notices, etc., often 1–2 pages. However, some may have multiple pages, resulting in a higher token count.  
@@ -630,128 +743,6 @@ These services are allocated into pools to support concurrent processing and red
 Click the image below to watch a short demo of SmartCustoms-Assistant in action:
 
 [![SmartCustoms Assistant Demo](https://img.youtube.com/vi/UCloHEqrPbQ/hqdefault.jpg)](https://www.youtube.com/watch?v=UCloHEqrPbQ)
-
----
-
-## SmartCustoms Assistant v1.1 - Update
-
-The **SmartCustoms-Assistant v1.1** version includes significant improvements to enhance performance, accuracy, and scalability. Below are the key changes compared to the previous version:
-
-### 🔄 Database Migration: MySQL → MongoDB
-
-- **Complete transition** from MySQL to **MongoDB** to leverage powerful vector search and text search capabilities.
-- Integration with **MongoDB Atlas Vector Search** allowing efficient similarity and fuzzy matching.
-- Improved structured data search performance with better scalability.
-
-### 🤖 Automated AggregatePipelineGenerator
-
-- Introduction of **AggregatePipelineGenerator** - a tool that uses LLM to create complex MongoDB search pipelines from user queries.
-- Support for multiple search types:
-  - **Fuzzy search** with customizable parameters (maxEdits, prefixLength, maxExpansions)
-  - **Regex search** for complex patterns
-  - **Exact matching** for specific fields
-  - **Range queries** especially for time periods
-
-### 🧠 Coordinator Architecture
-
-- Added **Coordinator** module to orchestrate optimal query processing strategies:
-  - Determines when to use Vector Search and when to use MongoDB Search
-  - Analyzes user queries to select the most effective search tool
-  - Optimizes information retrieval strategy based on query characteristics
-
-### 📊 Smart Query Enhancements
-
-- Implemented **Dynamic Thresholds** for fuzzy search:
-  - Pre-filtering with absolute threshold
-  - Relative filtering compared to highest search score
-- Combined **$search** and **$match** in MongoDB pipeline to optimize results
-- Support for input data transformation (such as date formatting) before searching
-
-### ⚙️ System Architecture Improvements
-
-- **Enhanced Connection Pool** design:
-  - MongoDB connection pool management with customizable configuration
-  - Optimization of pool parameters (maxPoolSize, minPoolSize, maxIdleTimeMS)
-- **Reorganized module** architecture:
-  - Added `prompts/` directory containing all templates and schemas for LLM
-  - Separated `llms/` and `mongodb/` into distinct modules
-  - Object Pool system for all heavyweight components (VectorStore, Reranker, Pipeline Generator)
-
-### 📝 New API Endpoints
-
-- Added new and improved API endpoints:
-  - `/api/chat` supporting intelligent queries via MongoDB or RAG depending on question type
-  - Document processing endpoints optimized for synchronized storage between Vector DB and MongoDB
-
-### 🧰 Enhanced Prompting Tools
-
-- Added detailed template files for MongoDB search and decision-making functionality
-- Templates are parameterized and centralized in one directory, making updates and maintenance easier
-
----
-
-## SmartCustoms Assistant v1.1 - App Structure
-```
-app-ver-1.1/                            
-├── api/                        - API endpoints
-│   ├── chat_endpoint.py        - Handles chat-related API endpoints
-│   ├── delete_endpoint.py      - Manages delete operations via API
-│   ├── doc_endpoint.py         - Processes DOC document-related API requests
-│   ├── pdf_endpoint.py         - Manages PDF-related API endpoints 
-│   ├── xlsx_delete.py          - Handles deletion of xlsx data on MongoDB
-│   └── xlsx_endpoint.py        - Processes Excel file-related API endpoints
-│
-├── config.py                   - Enhanced configuration with MongoDB settings and pooling options
-│
-├── data/                       - Stores uploaded data
-│   └── uploaded/               - Subdirectory for uploaded files
-│
-├── llms/                       - Large Language Model (LLM) processing modules
-│   ├── aggregate_pipeline_generator.py - Generates MongoDB search pipelines using LLM
-│   ├── coordinator.py          - Decides optimal search strategy (Vector vs MongoDB)
-│   ├── embedding_generator.py  - Generates embeddings from data
-│   ├── gpt_ocr.py              - OCR processing using GPT models
-│   └── response_generator.py   - Generates responses using LLM
-│
-├── main.py                     - Application deployment with connection pool management
-│
-├── models/                     - Contains AI/ML models
-│   └── yolov11_tuned.pt        - Fine-tuned YOLOv11 model for object detection
-│
-├── mongodb/                    - MongoDB integration modules
-│   ├── mongodb_manager.py      - Manages MongoDB connections and operations
-│   └── mongodb_search.py       - Implements search functionality through MongoDB
-│
-├── pipelines/                  - Data processing workflows
-│   ├── doc_pipelines/          - Document processing for DOC/DOCX
-│   ├── pdf_pipelines/          - PDF document processing with OCR
-│   ├── rag_pipelines/          - Retrieval-Augmented Generation pipelines
-│   └── xlsx_pipelines/         - Excel processing pipelines
-│
-├── prompts/                    - Centralized prompt templates for LLMs
-│   ├── constants.py            - Constant values used in prompts
-│   ├── mongo_pipeline.py       - Templates for MongoDB pipeline generation
-│   ├── ocr_prompts.py          - Templates for OCR processing
-│   ├── response_prompts.py     - Templates for response generation
-│   ├── search_decision.py      - Templates for search decision-making
-│   └── suggestion_templates.py - Templates for suggestion generation
-│
-├── utils/                      - Utility tools and helpers
-│
-└── requirements.txt            - Project dependencies
-```
-
-The app structure of v1.1 represents a significant evolution from the original design, with key architectural improvements:
-
-1. **Separation of concerns**: The code is better organized with dedicated directories for MongoDB operations, LLM processing, and prompt templates.
-
-2. **Modular design**: Each component is isolated, making the system more maintainable and testable.
-
-3. **Enhanced configuration**: The configuration system now includes detailed settings for MongoDB, connection pools, and service parameters.
-
-4. **Centralized prompts**: All LLM prompts are stored in a dedicated `prompts/` directory, facilitating easier updates and management.
-
-5. **Coordinator pattern**: The introduction of the `coordinator.py` module enables dynamic decision-making about which search strategy is optimal for a given query.
 
 ---
 
