@@ -1,5 +1,3 @@
-# hs_code_formatter.py
-
 import random
 from typing import Optional, List, Dict
 from datetime import datetime
@@ -122,6 +120,7 @@ class ResultsFormatter:
         tinh_trang = self.clean_field(record_display['TinhTrang'], "tình trạng")
         nuoc_xuat = self.clean_field(record_display['TenNuocXuatXu'], "nước xuất xứ")
         dieu_kien = self.clean_field(record_display['DieuKienGiaoHang'], "điều kiện giao hàng")
+        loai_hinh = self.clean_field(record_display['LoaiHinh'], "loại hình")
         xnk = self.format_tax(record_display['ThueSuatXNK'])
         ttdb = self.format_tax(record_display['ThueSuatTTDB'])
         vat = self.format_tax(record_display['ThueSuatVAT'])
@@ -137,8 +136,9 @@ class ResultsFormatter:
         
         lines = []
         lines.append(f"**Ngày:** {ngay_str}")
-        lines.append(f"- **Tên hàng:** {ten_hang}")
         lines.append(f"- **Mã HS:** {hs_code}")
+        lines.append(f"- **Tên hàng:** {ten_hang}")
+        lines.append(f"- **Loại hình:** {loai_hinh}") 
         lines.append(f"- **Trạng thái:** {tinh_trang}")
         lines.append(f"- **Nước xuất xứ:** {nuoc_xuat}")
         lines.append(f"- **Điều kiện giao hàng:** {dieu_kien}")
@@ -184,7 +184,10 @@ class ResultsFormatter:
             return random.choice(fallback_templates)
     
         # Giới hạn số lượng kết quả
-        limited_records = records[:num_results]
+        if len(records) <= num_results:
+            limited_records = records
+        else:
+            limited_records = random.sample(records, num_results)
         
         
         # Định dạng từng bản ghi
