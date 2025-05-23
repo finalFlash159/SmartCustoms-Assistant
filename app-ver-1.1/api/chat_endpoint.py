@@ -6,6 +6,7 @@ from fastapi import APIRouter, HTTPException, Request, Response, Cookie
 from pydantic import BaseModel
 sys.path.append('../') 
 from llms.response_generator import ResponseGenerator
+from utils.query_processor import process_query
 
 router = APIRouter()
 logging.basicConfig(level=logging.INFO)
@@ -79,8 +80,9 @@ async def chat(
                 # Nếu không dùng MongoDB, thực hiện truy vấn RAG
                 search_engine = await request.app.state.search_engine_queue.get()
                 try:
-                    retrieved_docs = await search_engine.retrieve(prompt, top_k=10)
-                    logger.info(f"Retrieved {len(retrieved_docs)} documents for query: {prompt}")
+                    processed_prompt = process_query(prompt)
+                    retrieved_docs = await search_engine.retrieve(processed_prompt, top_k=10)
+                    logger.info(f"Retrieved {len(retrieved_docs)} documents for query: {processed_prompt}")
                 finally:
                     await request.app.state.search_engine_queue.put(search_engine)
 
@@ -94,7 +96,7 @@ async def chat(
                         reranker = await request.app.state.async_cohere_reranker_queue.get()
                         try:
                             reranked_response = await reranker.rerank(
-                                query=prompt,
+                                query=processed_prompt,
                                 documents=page_contents,
                                 top_n=5
                             )

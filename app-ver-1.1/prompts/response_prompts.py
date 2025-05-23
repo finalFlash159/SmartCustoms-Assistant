@@ -30,6 +30,10 @@ RAG_SYSTEM_PROMPT = (
 # Template prompt người dùng khi có tài liệu (RAG)
 RAG_USER_PROMPT_TEMPLATE = (
     "**Tài liệu (sắp xếp theo thứ tự liên quan giảm dần)**:\n{docs_str}\n\n"
+    "### Hướng dẫn ghép nội dung nếu tài liệu là PDF (file_type = 'pdf'):\n"
+    "- Mỗi chunk bắt đầu với `Mã HS: <code>`. Hãy nhóm các chunk có cùng `<code>` lại với nhau.\n"
+    "- Trong mỗi nhóm, nối các chunk theo đúng thứ tự, và loại bỏ các dòng `Mã HS: <code>` ở giữa.\n"
+    "- Kết quả là một khối văn bản hoàn chỉnh cho mỗi file (mỗi `<code>`).\n\n"
     "### Nhiệm vụ\n"
     "- Người dùng hỏi: {query}\n"
     "Hãy trả lời trực tiếp nội dung, không cần viết 'Dựa trên tài liệu...' hay 'Theo tài liệu...'.\n\n"
@@ -49,6 +53,7 @@ RAG_USER_PROMPT_TEMPLATE = (
     "Nếu có nhiều file PDF, lặp lại cấu trúc này cho từng file.\n"
     "Hãy tuân thủ yêu cầu trên: mở đầu gọn, nội dung chính, kết luận với câu hỏi thân thiện."
 )
+
 
 
 def get_fallback_system_prompt():
