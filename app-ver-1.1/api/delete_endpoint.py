@@ -80,6 +80,10 @@ async def delete_uploaded_file(request: Request, deletion_request: UploadedFileD
     except Exception as e:
         logging.error(f"Lỗi xóa file {actual_filename}: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Lỗi xóa file: {str(e)}")
+    finally:
+        if vector_store is not None:
+            await request.app.state.vector_store_queue.put(vector_store)
+            logging.info("Đã trả vector store về hàng đợi.")
 
     return {
         "status": "Deleted",
