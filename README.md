@@ -1,7 +1,9 @@
 # SmartCustoms Assistant
 
-[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
-[![MongoDB](https://img.shields.io/badge/MongoDB-4.4+-green.svg)](https://www.mongodb.com/)
+[![Python 3.12.4](https://img.shields.io/badge/python-3.12.4-blue.svg)](https://www.python.org/downloads/)
+[![PyMongo 4.13.0](https://img.shields.io/badge/PyMongo-4.13.0-green.svg)](https://www.mongodb.com/)
+[![Motor 3.7.1](https://img.shields.io/badge/Motor-3.7.1-green.svg)](https://motor.readthedocs.io/)
+[![PyTesseract 0.3.13](https://img.shields.io/badge/PyTesseract-0.3.13-blue.svg)](https://pypi.org/project/pytesseract/)
 [![OpenAI](https://img.shields.io/badge/OpenAI-GPT--4-orange.svg)](https://openai.com/)
 
 An intelligent AI system for customs procedures consulting and goods classification using Retrieval-Augmented Generation (RAG).
@@ -15,8 +17,10 @@ An intelligent AI system for customs procedures consulting and goods classificat
 
 ## System Requirements
 
-- Python 3.8+
-- MongoDB 4.4+
+- Python 3.12.4
+- PyMongo 4.13.0 (MongoDB driver)
+- Motor 3.7.1 (Async MongoDB driver)
+- PyTesseract 0.3.13 (OCR processing with dual-strategy: GPT-4 primary, Tesseract fallback)
 - OpenAI API Key
 - Cohere API Key (for reranking)
 
@@ -118,8 +122,10 @@ MONGODB_POOL_SIZE = 10
 
 ### PDF Processing
 - **YOLOv11**: Detection and removal of sensitive information
-- **GPT-4**: High-accuracy OCR
-- **Tesseract**: Fallback OCR
+- **Dual OCR Strategy**: 
+  - **Primary**: GPT-4 for high-quality Vietnamese text recognition
+  - **Fallback**: PyTesseract when GPT-4 returns <20 words or fails
+- **Smart switching**: Automatic failover for optimal results
 
 ### Excel Processing
 - Data normalization and storage in MongoDB
