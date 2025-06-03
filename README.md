@@ -24,7 +24,7 @@ An intelligent AI system for customs procedures consulting and goods classificat
 
 ```bash
 # Clone repository
-git clone https://github.com/yourrepo/SmartCustoms-Assistant.git
+git clone ...
 cd SmartCustoms-Assistant/app-ver-1.1
 
 # Create virtual environment
