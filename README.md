@@ -20,6 +20,7 @@ An intelligent AI system for customs procedures consulting and goods classificat
 - Python 3.12.4
 - PyMongo 4.13.0 (MongoDB driver)
 - Motor 3.7.1 (Async MongoDB driver)
+- Qdrant (Vector database)
 - PyTesseract 0.3.13 (OCR processing with dual-strategy: GPT-4 primary, Tesseract fallback)
 - OpenAI API Key
 - Cohere API Key (for reranking)
@@ -96,6 +97,7 @@ COHERE_API_KEY=your_cohere_key
 
 # Qdrant
 QDRANT_URL=http://localhost:6333
+QDRANT_COLLECTION_NAME=chatbot_embeddings
 ```
 
 ### Pool Configuration
@@ -112,7 +114,7 @@ MONGODB_POOL_SIZE = 10
 
 | Feature | v1.0 | v1.1 |
 |---------|------|------|
-| Database | MySQL | MongoDB |
+| Database | MySQL + Qdrant | MongoDB + Qdrant |
 | Search | Vector + **ToolAgent** | Vector + MongoDB |
 | Query Routing | **ToolAgent** decision logic | Automatic (Coordinator) |
 | Pipeline Generation | Static | Dynamic (LLM-generated) |
