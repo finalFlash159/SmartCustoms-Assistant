@@ -117,9 +117,6 @@ MONGODB_POOL_SIZE = 10
 | Database | MySQL + Qdrant | MongoDB + Qdrant |
 | Search | Vector + **ToolAgent** | Vector + MongoDB |
 | Query Routing | **ToolAgent** decision logic | Automatic (Coordinator) |
-| Pipeline Generation | Static | Dynamic (LLM-generated) |
-| Connection Pooling | Basic | Advanced |
-| Tool System | **MySQL ToolAgent** (HS codes, suppliers, products) | **Tool Agent** (MongoDB, OCR, HS Lookup) |
 
 ## Data Processing
 
