@@ -12,7 +12,7 @@ An intelligent AI system for customs procedures consulting and goods classificat
 
 - **Instant Response**: Consulting on import/export regulations, customs clearance procedures, and HS code classification
 - **Multi-format Processing**: DOC/DOCX, Excel, PDF with intelligent OCR
-- **Tool Agent**: Accurate data retrieval from MongoDB
+- **Tool Agent**: Accurate data retrieval from MongoDB (evolved from v1.0's MySQL ToolAgent)
 - **Smart Search**: Vector search combined with MongoDB using Coordinator
 
 ## System Requirements
@@ -113,10 +113,11 @@ MONGODB_POOL_SIZE = 10
 | Feature | v1.0 | v1.1 |
 |---------|------|------|
 | Database | MySQL | MongoDB |
-| Search | Vector only | Vector + MongoDB |
-| Query Routing | Manual | Automatic (Coordinator) |
+| Search | Vector + **ToolAgent** | Vector + MongoDB |
+| Query Routing | **ToolAgent** decision logic | Automatic (Coordinator) |
 | Pipeline Generation | Static | Dynamic (LLM-generated) |
 | Connection Pooling | Basic | Advanced |
+| Tool System | **MySQL ToolAgent** (HS codes, suppliers, products) | **Tool Agent** (MongoDB, OCR, HS Lookup) |
 
 ## Data Processing
 
@@ -160,6 +161,11 @@ MONGODB_POOL_SIZE = 10
 - **Object Pool system** for heavyweight components
 - **Asynchronous design** for improved concurrency
 - **Reorganized module structure** with dedicated directories
+
+### Tool Agent Evolution
+- **v1.0 ToolAgent**: Specialized MySQL tools (fuzzy supplier matching, full-text product search, HS code lookup)
+- **v1.1 Tool Agent**: Expanded to MongoDB integration with OCR and enhanced HS lookup capabilities
+- **Improved Decision Logic**: More sophisticated routing between tool usage and RAG pipeline
 
 ##  Testing
 
